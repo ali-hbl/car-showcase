@@ -24,10 +24,7 @@ const SearchBar = () => {
 
     const newPathname = `${window.location.pathname}?${searchParams.toString()}`;
 
-    console.log({ searchParams });
-    console.log({ newPathname });
-
-    router.push(newPathname);
+    router.push(newPathname, { scroll: false });
   };
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
