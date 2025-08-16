@@ -6,11 +6,12 @@ import { fetchCars } from '@/utils';
 export default async function Home({ searchParams }: HomeProps) {
   const allCars = await fetchCars({
     manufacturer: searchParams.manufacturer || '',
-    year: searchParams.year || 2022,
+    year: searchParams.year,
     fuel: searchParams.fuel || '',
     limit: searchParams.limit || 10,
     model: searchParams.model || '',
   });
+
   const isDataEmpty = !Array.isArray(allCars) || allCars.length < 1 || !allCars;
   const pageNumber = (searchParams.limit || 10) / 10;
   const isNext = (searchParams.limit || 10) > allCars.length;
@@ -40,7 +41,8 @@ export default async function Home({ searchParams }: HomeProps) {
           </section>
         ) : (
           <div className="home__error-container">
-            <h2 className="text-xl font-bold text-black">Oops, no results</h2> <p>{allCars?.message}</p>
+            <h2 className="text-xl font-bold text-black">Oops, no results</h2>
+            <p>No cars match your search. Try another model or manufacturer.</p>
           </div>
         )}
       </div>

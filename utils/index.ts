@@ -1,29 +1,50 @@
 import { CarProps, FilterProps } from '@/types';
 
 export async function fetchCars(filters: FilterProps) {
-  const { manufacturer, year, model, limit, fuel } = filters;
+  const manufacturer = (filters.manufacturer ?? '').trim();
+  const model = (filters.model ?? '').trim();
+  const fuel = (filters.fuel ?? '').trim();
+  const limit = String(Number(filters.limit ?? 10));
+  const year = filters.year !== undefined || filters.year !== '' ? String(filters.year) : '';
 
-  // Set the required headers for the API request
-  const headers: HeadersInit = {
-    'X-RapidAPI-Key': process.env.RAPID_API_KEY || '',
-    'X-RapidAPI-Host': 'cars-by-api-ninjas.p.rapidapi.com',
-  };
+  const key = process.env.RAPID_API_KEY;
+  if (!key) {
+    // en prod tu peux logger, ici on échoue silencieusement côté UI
+    return [];
+  }
 
-  // Set the required headers for the API request
-  const response = await fetch(
-    `https://cars-by-api-ninjas.p.rapidapi.com/v1/cars?make=${manufacturer}&year=${year}&model=${model}&limit=${limit}&fuel_type=${fuel}`,
-    {
-      headers: headers,
-    },
-  );
+  const qs = new URLSearchParams();
+  if (manufacturer) qs.set('make', manufacturer);
+  if (model) qs.set('model', model);
+  if (fuel) qs.set('fuel_type', fuel);
+  if (year) qs.set('year', year);
+  qs.set('limit', limit);
 
-  // Parse the response as JSON
-  const result = await response.json();
+  const url = `https://cars-by-api-ninjas.p.rapidapi.com/v1/cars?${qs.toString()}`;
 
-  console.log("API result", result); // ← logs côté serveur
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'X-RapidAPI-Key': key,
+        'X-RapidAPI-Host': 'cars-by-api-ninjas.p.rapidapi.com',
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
 
-  return result;
+    if (!response.ok) {
+      // optionnel: console.error('Cars API error', response.status, await response.text());
+      return [];
+    }
+
+    const result = await response.json();
+    return Array.isArray(result) ? result : [];
+  } catch {
+    // optionnel: console.error('Cars API fetch failed', e);
+    return [];
+  }
 }
+
 
 export const calculateCarRent = (city_mpg: number, year: number) => {
   const basePricePerDay = 50; // Base rental price per day in dollars
