@@ -1,4 +1,8 @@
 import { CarProps, FilterProps } from '@/types';
+import { toNumOrNull } from './format';
+
+const key = process.env.RAPID_API_KEY;
+const API_HOST = 'cars-by-api-ninjas.p.rapidapi.com';
 
 export async function fetchCars(filters: FilterProps) {
   const manufacturer = (filters.manufacturer ?? '').trim();
@@ -31,7 +35,7 @@ export async function fetchCars(filters: FilterProps) {
 
     if (!response.ok) {
       // Optionnel: log du corps pour debug fin
-      // console.error('Cars API error:', response.status, await response.text());
+      console.error('Cars API error:', response.status, await response.text());
       return [];
     }
 
@@ -43,14 +47,47 @@ export async function fetchCars(filters: FilterProps) {
   }
 }
 
-// utils/index.ts (ou où est ta fonction)
-import { toNumOrNull } from './format';
+async function callCarsAPI(qs: URLSearchParams) {
+  if (!key) return [];
+  const url = `https://${API_HOST}/v1/cars?${qs.toString()}`;
+  const res = await fetch(url, {
+    headers: {
+      'X-RapidAPI-Key': key,
+      'X-RapidAPI-Host': API_HOST,
+      Accept: 'application/json',
+    },
+    cache: 'no-store',
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
+export async function fetchDefaultCars(take = 24) {
+  const popularMakes = ['toyota', 'honda', 'ford', 'bmw', 'mercedes', 'audi', 'volkswagen', 'hyundai', 'kia', 'nissan'];
+
+  const results = await Promise.allSettled(popularMakes.map((m) => callCarsAPI(new URLSearchParams([['make', m]]))));
+
+  // flat + dedupe (make+model+year)
+  const all = results.filter((r) => r.status === 'fulfilled').flatMap((r: any) => r.value as any[]);
+
+  const seen = new Set<string>();
+  const deduped: any[] = [];
+  for (const c of all) {
+    const key = `${c.make ?? ''}|${c.model ?? ''}|${c.year ?? ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(c);
+    if (deduped.length >= take) break;
+  }
+  return deduped;
+}
 
 export function calculateCarRent(cityMpg: any, year: any) {
-  const mpg = toNumOrNull(cityMpg) ?? 25;      // valeur par défaut raisonnable
-  const yr  = toNumOrNull(year) ?? 2019;
+  const mpg = toNumOrNull(cityMpg) ?? 25; // valeur par défaut raisonnable
+  const yr = toNumOrNull(year) ?? 2019;
 
-  const basePricePerDay = 40;                  // à ta guise
+  const basePricePerDay = 40; // à ta guise
   const ageFactor = Math.max(0, new Date().getFullYear() - yr) * 0.1;
   const mpgFactor = 1 + Math.max(0, 30 - Math.min(30, mpg)) * 0.02;
 
@@ -61,9 +98,9 @@ export function calculateCarRent(cityMpg: any, year: any) {
 export const generateCarImageUrl = (car: Partial<CarProps>, angle?: string): string => {
   const url = new URL('https://cdn.imagin.studio/getimage');
 
-  const make  = (car.make ?? '').toString().trim();
+  const make = (car.make ?? '').toString().trim();
   const model = (car.model ?? '').toString().trim();
-  const year  = typeof car.year === 'number' ? String(car.year) : (car.year ?? '').toString().trim();
+  const year = typeof car.year === 'number' ? String(car.year) : (car.year ?? '').toString().trim();
 
   // Si make ou model manquent, renvoyer une image de fallback
   if (!make || !model) return '/public/hero.png';
@@ -73,12 +110,11 @@ export const generateCarImageUrl = (car: Partial<CarProps>, angle?: string): str
   url.searchParams.append('modelFamily', model.split(' ')[0]);
   url.searchParams.append('zoomType', 'fullscreen');
 
-  if (year)  url.searchParams.append('modelYear', year);
+  if (year) url.searchParams.append('modelYear', year);
   if (angle) url.searchParams.append('angle', `${angle}`);
 
   return url.toString();
 };
-
 
 export const updateSearchParams = (type: string, value: string) => {
   const searchParams = new URLSearchParams(window.location.search); // Get the current URL search params
