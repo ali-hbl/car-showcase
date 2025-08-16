@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import CustomButton from './CustomButton';
-import CarDetails from './CarDetails';
 import { CarProps } from '@/types';
 import { calculateCarRent, generateCarImageUrl } from '@/utils';
-import { toNumOrNull, safeText } from '@/utils/format';
+import { safeText, toNumOrNull } from '@/utils/format';
+import Image from 'next/image';
+import { useState } from 'react';
+import CarDetails from './CarDetails';
+import CustomButton from './CustomButton';
 
-interface CarCardProps { car: CarProps; }
+interface CarCardProps {
+  car: CarProps;
+}
 
 const CarCard = ({ car }: CarCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,13 +21,10 @@ const CarCard = ({ car }: CarCardProps) => {
   const trans = safeText(car.transmission);
   const drive = safeText(car.drive).toUpperCase();
   const cityMpgNum = toNumOrNull(car.city_mpg);
-  const yearNum    = toNumOrNull(car.year) ?? 2020; // fallback pour l'image & le calcul
+  const yearNum = toNumOrNull(car.year) ?? 2020; // fallback pour l'image & le calcul
 
   // Empêche NaN
   const carRent = calculateCarRent(cityMpgNum ?? 25, yearNum);
-
-  // Si generateCarImageUrl a besoin d'un year number:
-  const imgUrl = generateCarImageUrl({ ...car, year: yearNum } as any);
 
   return (
     <div className="car-card group">
@@ -42,7 +41,7 @@ const CarCard = ({ car }: CarCardProps) => {
       </p>
 
       <div className="relative my-3 h-40 w-full object-contain">
-        <Image src={imgUrl} alt={`${make} ${model}`} className="object-contain" fill priority />
+        <Image src={generateCarImageUrl(car)} alt={`${make} ${model}`} className="object-contain" fill priority />
       </div>
 
       <div className="relative mt-2 flex w-full">
@@ -59,9 +58,7 @@ const CarCard = ({ car }: CarCardProps) => {
 
           <div className="flex flex-col items-center justify-center gap-2">
             <Image src="/gas.svg" alt="Gas" width={20} height={20} />
-            <p className="text-[14px]">
-              {cityMpgNum != null ? `${cityMpgNum} MPG` : 'N/A MPG'}
-            </p>
+            <p className="text-[14px]">{cityMpgNum != null ? `${cityMpgNum} MPG` : 'N/A MPG'}</p>
           </div>
         </div>
 

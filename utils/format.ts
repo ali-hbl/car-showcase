@@ -1,5 +1,15 @@
-// utils/format.ts
 const PREMIUM = 'premium subscribers only';
+
+export function isPremiumOnly(v: unknown) {
+  return typeof v === 'string' && v.toLowerCase().includes(PREMIUM);
+}
+
+export function safeText(v: unknown, fallback = 'N/A'): string {
+  if (v == null) return fallback;
+  const s = String(v).trim();
+  if (!s || isPremiumOnly(s)) return fallback;
+  return s;
+}
 
 export function toNumOrNull(v: unknown): number | null {
   if (typeof v === 'number' && Number.isFinite(v)) return v;
@@ -8,11 +18,4 @@ export function toNumOrNull(v: unknown): number | null {
     return Number.isFinite(n) ? n : null;
   }
   return null;
-}
-
-export function safeText(v: unknown, fallback = 'N/A'): string {
-  if (v == null) return fallback;
-  const s = String(v).trim();
-  if (!s || s.includes(PREMIUM)) return fallback;
-  return s;
 }

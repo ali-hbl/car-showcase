@@ -24,8 +24,8 @@ export interface CarProps {
   drive?: string | null;
   fuel_type?: string | null;
   highway_mpg?: number | string | null;
-  make?: string | null;
-  model?: string | null;
+  make?: any;
+  model?: any;
   transmission?: string | null; // 'a' | 'm' | string
   year?: number | string | null;
 }

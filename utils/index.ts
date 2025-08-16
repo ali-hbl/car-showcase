@@ -64,7 +64,7 @@ async function callCarsAPI(qs: URLSearchParams) {
 }
 
 export async function fetchDefaultCars(take = 24) {
-  const popularMakes = ['toyota', 'honda', 'ford', 'bmw', 'mercedes', 'audi', 'volkswagen', 'hyundai', 'kia', 'nissan'];
+  const popularMakes = ['audi', 'porsche'];
 
   const results = await Promise.allSettled(popularMakes.map((m) => callCarsAPI(new URLSearchParams([['make', m]]))));
 
@@ -94,27 +94,41 @@ export function calculateCarRent(cityMpg: any, year: any) {
   return Math.round(basePricePerDay * (1 + ageFactor) * mpgFactor);
 }
 
-// utils/index.ts (ou où est ta fonction)
-export const generateCarImageUrl = (car: Partial<CarProps>, angle?: string): string => {
-  const url = new URL('https://cdn.imagin.studio/getimage');
-
-  const make = (car.make ?? '').toString().trim();
-  const model = (car.model ?? '').toString().trim();
-  const year = typeof car.year === 'number' ? String(car.year) : (car.year ?? '').toString().trim();
-
-  // Si make ou model manquent, renvoyer une image de fallback
-  if (!make || !model) return '/public/hero.png';
+export const generateCarImageUrl = (car: CarProps, angle?: string) => {
+  const url = new URL("https://cdn.imagin.studio/getimage");
+  const { make, model, year } = car;
 
   url.searchParams.append('customer', 'hrjavascript-mastery');
   url.searchParams.append('make', make);
-  url.searchParams.append('modelFamily', model.split(' ')[0]);
+  url.searchParams.append('modelFamily', model.split(" ")[0]);
   url.searchParams.append('zoomType', 'fullscreen');
+  url.searchParams.append('modelYear', `${year}`);
+  // url.searchParams.append('zoomLevel', zoomLevel);
+  url.searchParams.append('angle', `${angle}`);
 
-  if (year) url.searchParams.append('modelYear', year);
-  if (angle) url.searchParams.append('angle', `${angle}`);
+  return `${url}`;
+} 
 
-  return url.toString();
-};
+// export const generateCarImageUrl = (car: Partial<CarProps>, angle?: string): string => {
+//   const url = new URL('https://cdn.imagin.studio/getimage');
+
+//   const make = (car.make ?? '').toString().trim();
+//   const model = (car.model ?? '').toString().trim();
+//   const year = typeof car.year === 'number' ? String(car.year) : (car.year ?? '').toString().trim();
+
+//   // Si make ou model manquent, renvoyer une image de fallback
+//   if (!make || !model) return '/public/hero.png';
+
+//   url.searchParams.append('customer', 'hrjavascript-mastery');
+//   url.searchParams.append('make', make);
+//   url.searchParams.append('modelFamily', model.split(' ')[0]);
+//   url.searchParams.append('zoomType', 'fullscreen');
+
+//   if (year) url.searchParams.append('modelYear', year);
+//   if (angle) url.searchParams.append('angle', `${angle}`);
+
+//   return url.toString();
+// };
 
 export const updateSearchParams = (type: string, value: string) => {
   const searchParams = new URLSearchParams(window.location.search); // Get the current URL search params

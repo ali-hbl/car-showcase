@@ -15,7 +15,7 @@ export default async function Home({ searchParams }: HomeProps) {
   );
 
   const allCars = hasFilters ? await fetchCars(
-    { manufacturer, model, fuel, year, limit }) : await fetchDefaultCars(24); // ← nombre de cartes par défaut
+    { manufacturer, model, fuel, year, limit }) : await fetchDefaultCars(10); // ← nombre de cartes par défaut
 
   const isDataEmpty = !Array.isArray(allCars) || allCars.length === 0;
 
