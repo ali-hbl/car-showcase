@@ -4,17 +4,19 @@ import { HomeProps } from '@/types';
 import { fetchCars } from '@/utils';
 
 export default async function Home({ searchParams }: HomeProps) {
+  const limit = Number(searchParams.limit ?? 10);
+
   const allCars = await fetchCars({
     manufacturer: searchParams.manufacturer || '',
     year: searchParams.year,
     fuel: searchParams.fuel || '',
-    limit: searchParams.limit || 10,
     model: searchParams.model || '',
+    limit, // utilisé uniquement pour slice côté serveur
   });
 
   const isDataEmpty = !Array.isArray(allCars) || allCars.length < 1 || !allCars;
-  const pageNumber = (searchParams.limit || 10) / 10;
-  const isNext = (searchParams.limit || 10) > allCars.length;
+  const pageNumber = 1;
+  const isNext = false;
 
   return (
     <main className="overflow-hidden">
@@ -34,7 +36,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
-        {!isDataEmpty ? (
+        {/* {!isDataEmpty ? (
           <section>
             <div className="home__cars-wrapper">{allCars?.map((car) => <CarCard car={car} />)}</div>
             <ShowMore pageNumber={pageNumber} isNext={isNext} />
@@ -44,7 +46,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <h2 className="text-xl font-bold text-black">Oops, no results</h2>
             <p>No cars match your search. Try another model or manufacturer.</p>
           </div>
-        )}
+        )} */}
       </div>
     </main>
   );

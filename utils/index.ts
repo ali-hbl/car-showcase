@@ -4,22 +4,19 @@ export async function fetchCars(filters: FilterProps) {
   const manufacturer = (filters.manufacturer ?? '').trim();
   const model = (filters.model ?? '').trim();
   const fuel = (filters.fuel ?? '').trim();
-  const limit = String(Number(filters.limit ?? 10));
+  const limitNum = Number(filters.limit ?? 10);
   const year = filters.year !== undefined || filters.year !== '' ? String(filters.year) : '';
 
   const key = process.env.RAPID_API_KEY;
-  if (!key) {
-    // en prod tu peux logger, ici on échoue silencieusement côté UI
-    return [];
-  }
+  if (!key) return [];
 
   const qs = new URLSearchParams();
   if (manufacturer) qs.set('make', manufacturer);
   if (model) qs.set('model', model);
   if (fuel) qs.set('fuel_type', fuel);
   if (year) qs.set('year', year);
-  qs.set('limit', limit);
 
+  // ⛔️ NE PAS ENVOYER `limit` → premium only
   const url = `https://cars-by-api-ninjas.p.rapidapi.com/v1/cars?${qs.toString()}`;
 
   try {
@@ -27,24 +24,24 @@ export async function fetchCars(filters: FilterProps) {
       headers: {
         'X-RapidAPI-Key': key,
         'X-RapidAPI-Host': 'cars-by-api-ninjas.p.rapidapi.com',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       cache: 'no-store',
     });
 
     if (!response.ok) {
-      // optionnel: console.error('Cars API error', response.status, await response.text());
+      // Optionnel: log du corps pour debug fin
+      // console.error('Cars API error:', response.status, await response.text());
       return [];
     }
 
-    const result = await response.json();
-    return Array.isArray(result) ? result : [];
+    const data = await response.json();
+    // Coupe côté serveur pour l’UI
+    return Array.isArray(data) ? data.slice(0, Math.max(1, limitNum)) : [];
   } catch {
-    // optionnel: console.error('Cars API fetch failed', e);
     return [];
   }
 }
-
 
 export const calculateCarRent = (city_mpg: number, year: number) => {
   const basePricePerDay = 50; // Base rental price per day in dollars
