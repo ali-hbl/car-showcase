@@ -36,7 +36,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
-        {/* {!isDataEmpty ? (
+        {!isDataEmpty ? (
           <section>
             <div className="home__cars-wrapper">{allCars?.map((car) => <CarCard car={car} />)}</div>
             <ShowMore pageNumber={pageNumber} isNext={isNext} />
@@ -46,7 +46,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <h2 className="text-xl font-bold text-black">Oops, no results</h2>
             <p>No cars match your search. Try another model or manufacturer.</p>
           </div>
-        )} */}
+        )}
       </div>
     </main>
   );

@@ -15,36 +15,20 @@ export interface SearchManuFacturerProps {
   setManufacturer: (manufacturer: string) => void;
 }
 
-export type CarProps = {
-  make?: any;
-  model?: any;
-  city_mpg?: number | string;
-  class?: string;
-  combination_mpg?: number | string;
-  cylinders?: number | string;
-  displacement?: number | string;
-  drive?: string;
-  fuel_type?: string;
-  highway_mpg?: number | string;
-  transmission?: string; // 'a' | 'm' | texte
-  year?: number | string;
-};
-
-// export type Car = {
-//   make?: string;
-//   model?: string;
-//   year?: number | string;
-//   class?: string;
-//   fuel_type?: string;
-//   transmission?: string;
-//   drive?: string;
-//   cylinders?: number | string;
-//   displacement?: number | string;
-//   city_mpg?: number | string;
-//   highway_mpg?: number | string;
-//   combination_mpg?: number | string;
-//   // + autres champs éventuels, tous optionnels
-// };
+export interface CarProps {
+  city_mpg: number;
+  class: string;
+  combination_mpg: number;
+  cylinders: number;
+  displacement: number;
+  drive: string;
+  fuel_type: string;
+  highway_mpg: number;
+  make: string;
+  model: string;
+  transmission: string;
+  year: number;
+}
 
 export interface FilterProps {
   manufacturer?: string;
