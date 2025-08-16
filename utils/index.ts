@@ -43,35 +43,42 @@ export async function fetchCars(filters: FilterProps) {
   }
 }
 
-export const calculateCarRent = (city_mpg: number, year: number) => {
-  const basePricePerDay = 50; // Base rental price per day in dollars
-  const mileageFactor = 0.1; // Additional rate per mile driven
-  const ageFactor = 0.05; // Additional rate per year of vehicle age
+// utils/index.ts (ou où est ta fonction)
+import { toNumOrNull } from './format';
 
-  // Calculate additional rate based on mileage and age
-  const mileageRate = city_mpg * mileageFactor;
-  const ageRate = (new Date().getFullYear() - year) * ageFactor;
+export function calculateCarRent(cityMpg: any, year: any) {
+  const mpg = toNumOrNull(cityMpg) ?? 25;      // valeur par défaut raisonnable
+  const yr  = toNumOrNull(year) ?? 2019;
 
-  // Calculate total rental rate per day
-  const rentalRatePerDay = basePricePerDay + mileageRate + ageRate;
+  const basePricePerDay = 40;                  // à ta guise
+  const ageFactor = Math.max(0, new Date().getFullYear() - yr) * 0.1;
+  const mpgFactor = 1 + Math.max(0, 30 - Math.min(30, mpg)) * 0.02;
 
-  return rentalRatePerDay.toFixed(0);
-};
+  return Math.round(basePricePerDay * (1 + ageFactor) * mpgFactor);
+}
 
-export const generateCarImageUrl = (car: CarProps, angle?: string) => {
+// utils/index.ts (ou où est ta fonction)
+export const generateCarImageUrl = (car: Partial<CarProps>, angle?: string): string => {
   const url = new URL('https://cdn.imagin.studio/getimage');
-  const { make, model, year } = car;
+
+  const make  = (car.make ?? '').toString().trim();
+  const model = (car.model ?? '').toString().trim();
+  const year  = typeof car.year === 'number' ? String(car.year) : (car.year ?? '').toString().trim();
+
+  // Si make ou model manquent, renvoyer une image de fallback
+  if (!make || !model) return '/public/hero.png';
 
   url.searchParams.append('customer', 'hrjavascript-mastery');
   url.searchParams.append('make', make);
   url.searchParams.append('modelFamily', model.split(' ')[0]);
   url.searchParams.append('zoomType', 'fullscreen');
-  url.searchParams.append('modelYear', `${year}`);
-  // url.searchParams.append('zoomLevel', zoomLevel);
-  url.searchParams.append('angle', `${angle}`);
 
-  return `${url}`;
+  if (year)  url.searchParams.append('modelYear', year);
+  if (angle) url.searchParams.append('angle', `${angle}`);
+
+  return url.toString();
 };
+
 
 export const updateSearchParams = (type: string, value: string) => {
   const searchParams = new URLSearchParams(window.location.search); // Get the current URL search params

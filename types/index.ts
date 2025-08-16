@@ -16,18 +16,18 @@ export interface SearchManuFacturerProps {
 }
 
 export interface CarProps {
-  city_mpg: number;
-  class: string;
-  combination_mpg: number;
-  cylinders: number;
-  displacement: number;
-  drive: string;
-  fuel_type: string;
-  highway_mpg: number;
-  make: string;
-  model: string;
-  transmission: string;
-  year: number;
+  city_mpg?: number | string | null;
+  class?: string | null;
+  combination_mpg?: number | string | null;
+  cylinders?: number | string | null;
+  displacement?: number | string | null;
+  drive?: string | null;
+  fuel_type?: string | null;
+  highway_mpg?: number | string | null;
+  make?: string | null;
+  model?: string | null;
+  transmission?: string | null; // 'a' | 'm' | string
+  year?: number | string | null;
 }
 
 export interface FilterProps {

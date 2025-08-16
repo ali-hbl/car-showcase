@@ -1,21 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { CarProps } from '@/types';
-import { calculateCarRent, generateCarImageUrl } from '@/utils';
 import Image from 'next/image';
 import CustomButton from './CustomButton';
 import CarDetails from './CarDetails';
+import { CarProps } from '@/types';
+import { calculateCarRent, generateCarImageUrl } from '@/utils';
+import { toNumOrNull, safeText } from '@/utils/format';
 
-interface CarCardProps {
-  car: CarProps;
-}
+interface CarCardProps { car: CarProps; }
 
 const CarCard = ({ car }: CarCardProps) => {
-  const { city_mpg, year, make, model, transmission, drive } = car;
   const [isOpen, setIsOpen] = useState(false);
 
-  const carRent = calculateCarRent(city_mpg, year);
+  // Nettoyage des valeurs
+  const make = safeText(car.make);
+  const model = safeText(car.model);
+  const trans = safeText(car.transmission);
+  const drive = safeText(car.drive).toUpperCase();
+  const cityMpgNum = toNumOrNull(car.city_mpg);
+  const yearNum    = toNumOrNull(car.year) ?? 2020; // fallback pour l'image & le calcul
+
+  // Empêche NaN
+  const carRent = calculateCarRent(cityMpgNum ?? 25, yearNum);
+
+  // Si generateCarImageUrl a besoin d'un year number:
+  const imgUrl = generateCarImageUrl({ ...car, year: yearNum } as any);
 
   return (
     <div className="car-card group">
@@ -27,27 +37,31 @@ const CarCard = ({ car }: CarCardProps) => {
 
       <p className="mt-6 flex text-[32px] font-extrabold">
         <span className="self-start text-[14px] font-semibold">€</span>
-        {carRent}
+        {Number.isFinite(carRent) ? carRent : '—'}
         <span className="self-end text-[14px] font-medium">/day</span>
       </p>
 
       <div className="relative my-3 h-40 w-full object-contain">
-        <Image src={generateCarImageUrl(car)} alt="Car model" className="object-contain" fill priority />
+        <Image src={imgUrl} alt={`${make} ${model}`} className="object-contain" fill priority />
       </div>
 
       <div className="relative mt-2 flex w-full">
         <div className="text-gray flex w-full justify-between group-hover:invisible">
           <div className="flex flex-col items-center justify-center gap-2">
             <Image src="/steering-wheel.svg" alt="Steering wheel" width={20} height={20} />
-            <p className="text-[14px]">{transmission === 'a' ? 'Automatic' : 'Manual'}</p>
+            <p className="text-[14px]">{trans === 'a' ? 'Automatic' : trans === 'm' ? 'Manual' : trans}</p>
           </div>
+
           <div className="flex flex-col items-center justify-center gap-2">
             <Image src="/tire.svg" alt="Tire" width={20} height={20} />
-            <p className="text-[14px]">{drive.toUpperCase()}</p>
+            <p className="text-[14px]">{drive}</p>
           </div>
+
           <div className="flex flex-col items-center justify-center gap-2">
             <Image src="/gas.svg" alt="Gas" width={20} height={20} />
-            <p className="text-[14px]">{city_mpg} MPG</p>
+            <p className="text-[14px]">
+              {cityMpgNum != null ? `${cityMpgNum} MPG` : 'N/A MPG'}
+            </p>
           </div>
         </div>
 
