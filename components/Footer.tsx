@@ -1,6 +1,6 @@
+import { footerLinks } from '@/constants';
 import Image from 'next/image';
 import Link from 'next/link';
-import { footerLinks } from '@/constants';
 
 const Footer = () => (
   <footer className="mt-5 flex flex-col  border-t border-gray-100 text-black-100">
@@ -8,7 +8,7 @@ const Footer = () => (
       <div className="flex flex-col items-start justify-start gap-6">
         <Image src="/logo.svg" alt="logo" width={118} height={18} className="object-contain" />
         <p className="text-base text-gray-700">
-          Carhub 2023 <br />
+          Carhub {new Date().getFullYear()} <br />
           All Rights Reserved &copy;
         </p>
       </div>
@@ -30,7 +30,7 @@ const Footer = () => (
     </div>
 
     <div className="mt-10 flex flex-wrap items-center justify-between border-t border-gray-100 px-6 py-10 sm:px-16">
-      <p>@2023 CarHub. All rights reserved</p>
+      <p>Copyright @ {new Date().getFullYear()} CarHub. Ali - Tous droits réservés.</p>
 
       <div className="footer__copyrights-link">
         <Link href="/" className="text-gray-500">
